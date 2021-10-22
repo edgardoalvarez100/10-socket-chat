@@ -51,24 +51,62 @@ const conectarSocket = async() => {
         console.log('%cchat.js line:51 Socket Desconectado', 'color: white; background-color: red;', "Socket Desconectado");
     });
 
-    socket.on("recibir-mensaje", () => {
+    socket.on("recibir-mensajes", dibujarMensajes);
 
-    });
+    socket.on("usuarios-activos", dibujarUsuarios);
 
-    socket.on("usuarios-activos", (payload) => {
+    socket.on("mensaje-privado", (payload) => {
         console.log(payload)
     });
 
-    socket.on("mensaje-privado", () => {
+}
 
+const dibujarUsuarios = (usuarios = []) => {
+    let userHtml = '';
+    usuarios.forEach( ({nombre, uid}) => {
+        userHtml += `
+        <li>
+            <p>
+             <h5 class="text-success"> ${nombre}</h5>
+             <span class="fs-6 text-muted">${uid}</span>
+            </p>        
+        </li>
+        `;
     });
+    ulUsuarios.innerHTML= userHtml;
+}
 
+const dibujarMensajes = (mensajes = []) => {
+    let mensajesHtml = '';
+    mensajes.forEach( ({nombre, mensaje}) => {
+        mensajesHtml += `
+        <li>
+            <p>
+             <span class="text-primary"> ${nombre}:</span>
+             <span >${mensaje}</span>
+            </p>        
+        </li>
+        `;
+    });
+    ulMensajes.innerHTML= mensajesHtml;
 }
 
 const main = async () => {
     await validarJWT();
 }
 
+txtMensaje.addEventListener("keyup", ({keyCode}) => {
+    
+    if(keyCode !== 13){ return;}
+
+    const mensaje = txtMensaje.value;
+    const uid = txtUid.value;
+    if(mensaje.length === 0){return;}
+    
+    socket.emit("enviar-mensaje",{uid,mensaje});
+    txtMensaje.value = '';
+    
+})
 
 main();
 
